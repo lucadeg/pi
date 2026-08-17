@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pi Coding Agent — 3D Neural Swarm Galaxy Brain</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', 'Courier New', Courier, monospace; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #000000; color: #e0e0e0; user-select: none; }
+    #app { display: flex; flex-direction: column; width: 100vw; height: 100vh; }
+    
+    /* Top Header Bar */
+    header {
+      height: 38px;
+      background: #06080c;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      z-index: 20;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-pill { background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 3px; color: #00f0ff; font-weight: bold; }
+    .header-tag { color: #9ca3af; }
+    .header-val { color: #ffffff; font-weight: bold; }
+    .header-right { display: flex; align-items: center; gap: 16px; font-size: 10px; color: #9ca3af; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #00f0ff; box-shadow: 0 0 8px #00f0ff; display: inline-block; margin-right: 4px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+    /* Subheader Ticker */
+    .subheader {
+      height: 24px;
+      background: #030508;
+      border-bottom: 1px solid #151c28;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 9px;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow-x: auto;
+      z-index: 10;
+    }
+    .text-cyan { color: #00f0ff; }
+    .text-emerald { color: #10b981; }
+    .text-purple { color: #c084fc; }
+
+    /* Central 3D Canvas */
+    #canvas-container { flex: 1; position: relative; background: #000000; cursor: grab; }
+    #canvas-container:active { cursor: grabbing; }
+    canvas { width: 100%; height: 100%; display: block; }
+
+    .controls-overlay {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 10px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #e0e0e0; padding: 4px 8px; border-radius: 3px; cursor: pointer; text-align: left; font-size: 10px; }
+    .btn:hover { background: rgba(255, 255, 255, 0.16); color: #ffffff; }
+
+    /* Bottom Telemetry Deck */
+    footer {
+      height: 220px;
+      background: #040609;
+      border-top: 1px solid #1a2230;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      font-size: 9.5px;
+      z-index: 20;
+    }
+    .panel {
+      padding: 10px;
+      border-right: 1px solid #151c28;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel:last-child { border-right: none; }
+    .panel-title { font-size: 10px; font-weight: bold; color: #d1d5db; text-transform: uppercase; margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .log-stream { flex: 1; overflow-y: auto; font-size: 8.5px; line-height: 1.35; color: #9ca3af; }
+    .bar-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 9px; }
+    .bar-bg { width: 70px; height: 8px; background: #1f2937; border-radius: 2px; overflow: hidden; }
+    .bar-fill { height: 100%; }
+    .heat-matrix { display: flex; align-items: flex-end; gap: 3px; height: 48px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 6px; }
+    .heat-bar { flex: 1; background: #1f2937; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- 1. Header HUD -->
+    <header>
+      <div class="header-left">
+        <div><span class="header-tag">SWARM</span> <span class="header-pill">grok-swarm-01</span></div>
+        <div><span class="header-tag">BOTS</span> <span class="header-val">5</span></div>
+        <div><span class="header-tag">ACTIONS</span> <span class="header-val" id="val-actions">13,450</span></div>
+        <div><span class="header-tag">ONE PROFILE</span> <span class="header-val text-cyan">5 bots</span></div>
+        <div><span class="header-tag">SHARED LOGIN</span> <span class="header-val">--</span></div>
+        <div><span class="header-tag">SPEND CAP</span> <span class="header-val" style="color: #fbbf24;">none</span></div>
+        <div><span class="header-tag">AUDIT</span> <span class="header-val text-emerald">pending</span></div>
+      </div>
+      <div class="header-right">
+        <div><span style="color: #4b5563;">T:</span> 5.23</div>
+        <div><span style="color: #4b5563;">FNPS:</span> 0316</div>
+        <div><span class="live-dot"></span><span class="text-cyan" style="font-weight: bold;">LIVE SWARM</span></div>
+      </div>
+    </header>
+
+    <!-- Subheader -->
+    <div class="subheader">
+      <span class="text-cyan">● 6 bots live</span>
+      <span>|</span>
+      <span>depth 41 no spend cap</span>
+      <span>|</span>
+      <span class="text-emerald">actions armed</span>
+      <span>|</span>
+      <span>2 apps log/in</span>
+      <span>|</span>
+      <span class="text-purple">cluster: 5 bots</span>
+      <span>|</span>
+      <span class="text-cyan">earendil-pi harness connected</span>
+      <span>|</span>
+      <span>hermes ide unchained: port 5195</span>
+    </div>
+
+    <!-- 2. Central 3D Galaxy Canvas -->
+    <div id="canvas-container">
+      <canvas id="galaxy-canvas"></canvas>
+      <div class="controls-overlay">
+        <div style="font-weight: bold; color: #9ca3af; font-size: 9px; text-transform: uppercase;">3D Controls</div>
+        <button class="btn" id="btn-zoom-in">🔍 Zoom In (+)</button>
+        <button class="btn" id="btn-zoom-out">🔍 Zoom Out (-)</button>
+        <button class="btn" id="btn-reset">⟲ Reset Camera</button>
+        <div style="font-size: 8px; color: #6b7280; margin-top: 2px;">Trascina per ruotare<br/>Rotella per zoomare</div>
+      </div>
+    </div>
+
+    <!-- 3. Bottom Telemetry Deck (6 Panels) -->
+    <footer>
+      <!-- Panel 1: RUN LOG -->
+      <div class="panel">
+        <div class="panel-title"><span>RUN LOG</span><span class="text-cyan" style="font-size: 8px;">STREAMING</span></div>
+        <div class="log-stream">
+          <div style="color:#6b7280;">09:41 index <span style="color:#fff;">2,380 actions armed</span></div>
+          <div>09:41 grant <span class="text-cyan">stripe full access</span></div>
+          <div>09:41 spawn <span class="text-purple">invoice run</span></div>
+          <div style="color:#6b7280;">09:43 index <span style="color:#fff;">3,200 actions armed</span></div>
+          <div>09:43 spawn <span style="color:#f472b6;">calendar sync</span></div>
+          <div style="color:#6b7280;">09:43 index <span style="color:#fff;">2,450 actions armed</span></div>
+          <div style="color:#fbbf24;">09:43 probe 3 bots on 1 login</div>
+          <div>09:44 queue depth 41 no spend cap</div>
+          <div>09:44 run <span class="text-cyan">lead scrape batch 5/8</span></div>
+          <div>09:45 sync one browser profile</div>
+          <div>09:45 cookie <span class="text-purple">session reused v4</span></div>
+          <div class="text-emerald">09:45 check audit view pending</div>
+          <div>09:47 grant <span class="text-cyan">notion full access</span></div>
+          <div>09:47 grant <span class="text-cyan">calendar full access</span></div>
+          <div>09:48 traffic 5 bundles hot</div>
+          <div>09:48 spawn outreach</div>
+        </div>
+      </div>
+
+      <!-- Panel 2: ACCESS LEDGER -->
+      <div class="panel">
+        <div class="panel-title"><span>ACCESS LEDGER</span><span class="text-cyan">3 APPS</span></div>
+        <div style="margin-bottom: 8px;">
+          <div class="bar-row"><span>google</span><div class="bar-bg"><div class="bar-fill" style="width:90%; background:#00f0ff;"></div></div><span>6</span></div>
+          <div class="bar-row"><span>stripe</span><div class="bar-bg"><div class="bar-fill" style="width:50%; background:#c084fc;"></div></div><span>3</span></div>
+          <div class="bar-row"><span>notion</span><div class="bar-bg"><div class="bar-fill" style="width:35%; background:#f472b6;"></div></div><span>2</span></div>
+          <div class="bar-row"><span>calendar</span><div class="bar-bg"><div class="bar-fill" style="width:35%; background:#10b981;"></div></div><span>2</span></div>
+          <div class="bar-row"><span>x / api</span><div class="bar-bg"><div class="bar-fill" style="width:20%; background:#fbbf24;"></div></div><span>1</span></div>
+        </div>
+        <div style="margin-top:auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top:4px; font-size: 8px; color: #6b7280; line-height: 1.25;">
+          one machine · one chrome profile<br/>
+          one cookie jar · no sandbox<br/>
+          <span style="color:#d1d5db;">a bot is not a security boundary</span><br/>
+          session outlives a deleted bot
+        </div>
+      </div>
+
+      <!-- Panel 3: BLAST RADIUS -->
+      <div class="panel" style="align-items: center; text-align: center;">
+        <div class="panel-title" style="align-self: flex-start; width: 100%;"><span>BLAST RADIUS</span></div>
+        <div style="width: 80px; height: 80px; margin: auto;">
+          <svg style="width:100%; height:100%;" viewBox="0 0 100 100">
+            <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+            <polygon points="50,25 72,38 72,62 50,75 28,62 28,38" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
+            <polygon points="50,15 80,34 78,65 50,82 20,68 25,32" fill="rgba(0, 240, 255, 0.25)" stroke="#00f0ff" stroke-width="1.5" />
+            <text x="50" y="8" fill="#a1a1aa" font-size="6" text-anchor="middle">INB</text>
+            <text x="92" y="32" fill="#a1a1aa" font-size="6" text-anchor="middle">LED</text>
+            <text x="92" y="72" fill="#a1a1aa" font-size="6" text-anchor="middle">INV</text>
+            <text x="50" y="98" fill="#a1a1aa" font-size="6" text-anchor="middle">REP</text>
+            <text x="8" y="72" fill="#a1a1aa" font-size="6" text-anchor="middle">OUT</text>
+            <text x="8" y="32" fill="#a1a1aa" font-size="6" text-anchor="middle">CAL</text>
+          </svg>
+        </div>
+        <div style="font-size: 8px; color: #9ca3af; margin-top: 4px;">
+          <span class="text-cyan" style="font-weight: bold;">6 of 6 bots reached</span><br/>
+          it travels the login, not code<br/>
+          <span style="color:#6b7280;">hops: 3 · time to notice: 0.4s</span>
+        </div>
+      </div>
+
+      <!-- Panel 4: ACTION HEAT -->
+      <div class="panel">
+        <div class="panel-title"><span>ACTION HEAT</span><span class="text-emerald">658/s</span></div>
+        <div class="heat-matrix">
+          <div class="heat-bar"><div style="height:50%; background:#00f0ff;"></div></div>
+          <div class="heat-bar"><div style="height:85%; background:#ff007f;"></div></div>
+          <div class="heat-bar"><div style="height:60%; background:#00f0ff;"></div></div>
+          <div class="heat-bar"><div style="height:95%; background:#ff007f;"></div></div>
+          <div class="heat-bar"><div style="height:70%; background:#4cc9f0;"></div></div>
+          <div class="heat-bar"><div style="height:40%; background:#00f0ff;"></div></div>
+          <div class="heat-bar"><div style="height:80%; background:#ff007f;"></div></div>
+          <div class="heat-bar"><div style="height:90%; background:#ff007f;"></div></div>
+        </div>
+        <div style="font-size: 8.5px; color: #9ca3af; line-height: 1.35;">
+          <div style="display:flex; justify-content:space-between;"><span>clicks</span><span style="color:#fff;">3,428</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>page loads</span><span style="color:#fff;">3,882</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>writes sent</span><span style="color:#fff;">227</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>logins used</span><span style="color:#fff;">15</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>approvals</span><span class="text-emerald" style="font-weight:bold;">1</span></div>
+        </div>
+      </div>
+
+      <!-- Panel 5: THROUGHPUT & SPEND GAUGE -->
+      <div class="panel" style="text-align: center;">
+        <div class="panel-title" style="align-self: flex-start; width: 100%;"><span>THROUGHPUT</span></div>
+        <svg style="width: 100%; height: 28px;" viewBox="0 0 100 25">
+          <path d="M0,12 Q20,3 40,15 T80,8 T100,14" fill="none" stroke="#00f0ff" stroke-width="1.5" />
+        </svg>
+        <div style="font-size: 9px; color: #9ca3af;">actions/sec <span id="val-speed" style="color:#fff; font-weight:bold; font-size:11px;">655</span></div>
+        <div style="position: relative; width: 55px; height: 55px; margin: 4px auto 0;">
+          <svg style="width:100%; height:100%;" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" stroke-dasharray="180 360" transform="rotate(135 50 50)" />
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="110 360" transform="rotate(135 50 50)" />
+          </svg>
+          <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <span style="color:#fbbf24; font-weight:bold; font-size:11px;">$85.24</span>
+            <span style="font-size:7px; color:#6b7280;">no cap set</span>
+          </div>
+        </div>
+        <div style="font-size: 7.5px; color: #6b7280;">ceiling: none · stop rule: none</div>
+      </div>
+
+      <!-- Panel 6: BOT STATUS -->
+      <div class="panel">
+        <div class="panel-title"><span>BOT STATUS</span><span class="text-emerald">5 LIVE</span></div>
+        <div style="font-size: 8.5px; color: #9ca3af; line-height: 1.35; margin-bottom: 6px;">
+          <div style="display:flex; justify-content:space-between;"><span>inbox triage</span><span class="text-emerald" style="font-weight:bold;">running ●</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>lead scrape</span><span class="text-emerald" style="font-weight:bold;">running ●</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>invoice run</span><span class="text-emerald" style="font-weight:bold;">running ●</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>report build</span><span class="text-emerald" style="font-weight:bold;">running ●</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>calendar sync</span><span class="text-emerald" style="font-weight:bold;">running ●</span></div>
+        </div>
+        <div style="margin-top:auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top:4px; font-size: 8px; color: #6b7280; line-height: 1.25;">
+          shared: computer 1, profile 1,<br/>
+          cookie jar 1, credentials 1...<br/>
+          <span style="color:#f87171;">delete bot & session is open</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('galaxy-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const CLUSTERS = [
+      { id: 0, name: 'inbox triage', sublabel: 'read event', actions: '2,400 actions', status: 'running', cx: 140, cy: -180, cz: 20, color: '#00f0ff', nodeCount: 160 },
+      { id: 1, name: 'calendar sync', sublabel: 'sync google/cal', actions: '1,850 actions', status: 'running', cx: -10, cy: -80, cz: 80, color: '#ff2df7', nodeCount: 120 },
+      { id: 2, name: 'invoice run', sublabel: 'send receipt', actions: '3,200 actions', status: 'running', cx: -210, cy: 30, cz: -40, color: '#9d4edd', nodeCount: 190 },
+      { id: 3, name: 'lead scrape', sublabel: 'dedupe row 1294', actions: '3,200 actions', status: 'running', cx: 230, cy: 10, cz: 60, color: '#00f0ff', nodeCount: 210 },
+      { id: 4, name: 'report build', sublabel: 'write summary', actions: '2,100 actions', status: 'running', cx: 110, cy: 190, cz: -10, color: '#ff007f', nodeCount: 170 },
+      { id: 5, name: 'pi harness', sublabel: 'ast refactor', actions: '4,850 actions', status: 'running', cx: -160, cy: 180, cz: 50, color: '#38bdf8', nodeCount: 150 }
+    ];
+
+    const nodes = [];
+    CLUSTERS.forEach(cl => {
+      for (let i = 0; i < cl.nodeCount; i++) {
+        const u = Math.random();
+        const v = Math.random();
+        const theta = u * 2.0 * Math.PI;
+        const phi = Math.acos(2.0 * v - 1.0);
+        const radius = Math.cbrt(Math.random()) * (45 + Math.random() * 25);
+
+        const sinPhi = Math.sin(phi);
+        const x = cl.cx + radius * sinPhi * Math.cos(theta);
+        const y = cl.cy + radius * sinPhi * Math.sin(theta);
+        const z = cl.cz + radius * Math.cos(phi);
+
+        const colors = [cl.color, '#ffffff', '#00f0ff', '#ff007f', '#b5179e', '#4cc9f0'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        nodes.push({
+          x, y, z,
+          vx: (Math.random() - 0.5) * 0.15,
+          vy: (Math.random() - 0.5) * 0.15,
+          vz: (Math.random() - 0.5) * 0.15,
+          clusterId: cl.id,
+          color,
+          size: Math.random() > 0.88 ? 2.5 : Math.random() > 0.6 ? 1.8 : 1.1
+        });
+      }
+    });
+
+    const lasers = [];
+    for (let i = 0; i < 45; i++) {
+      const fromCluster = Math.floor(Math.random() * CLUSTERS.length);
+      let toCluster = (fromCluster + 1 + Math.floor(Math.random() * (CLUSTERS.length - 1))) % CLUSTERS.length;
+      lasers.push({
+        fromCluster,
+        toCluster,
+        progress: Math.random(),
+        speed: 0.004 + Math.random() * 0.009,
+        color: Math.random() > 0.5 ? '#ffffff' : Math.random() > 0.3 ? '#00f0ff' : '#ff007f',
+        thickness: Math.random() > 0.8 ? 2.2 : 1.2
+      });
+    }
+
+    let rotX = 0.15, rotY = -0.2, zoom = 1.05;
+    let isDragging = false, dragStartX = 0, dragStartY = 0;
+
+    canvas.parentElement.addEventListener('mousedown', e => {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      rotX = Math.max(-1.2, Math.min(1.2, rotX + dy * 0.005));
+      rotY += dx * 0.005;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+    canvas.parentElement.addEventListener('wheel', e => {
+      e.preventDefault();
+      zoom = Math.max(0.4, Math.min(2.5, zoom - e.deltaY * 0.001));
+    });
+
+    document.getElementById('btn-zoom-in').onclick = () => zoom = Math.min(2.5, zoom + 0.15);
+    document.getElementById('btn-zoom-out').onclick = () => zoom = Math.max(0.4, zoom - 0.15);
+    document.getElementById('btn-reset').onclick = () => { rotX = 0.15; rotY = -0.2; zoom = 1.05; };
+
+    function project(x, y, z, width, height) {
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+
+      const x1 = x * cosY + z * sinY;
+      const y1 = y;
+      const z1 = -x * sinY + z * cosY;
+
+      const x2 = x1;
+      const y2 = y1 * cosX - z1 * sinX;
+      const z2 = y1 * sinX + z1 * cosX;
+
+      const fov = 480 * zoom;
+      const scale = fov / (fov + z2 + 300);
+      const px = width / 2 + x2 * scale;
+      const py = height / 2 + y2 * scale;
+
+      return { px, py, scale };
+    }
+
+    function render(time) {
+      const width = canvas.parentElement.clientWidth;
+      const height = canvas.parentElement.clientHeight;
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      ctx.fillStyle = '#010204';
+      ctx.fillRect(0, 0, width, height);
+
+      // Radial background
+      const grad = ctx.createRadialGradient(width / 2, height / 2, 20, width / 2, height / 2, width * 0.65);
+      grad.addColorStop(0, 'rgba(0, 40, 60, 0.25)');
+      grad.addColorStop(0.5, 'rgba(20, 0, 40, 0.15)');
+      grad.addColorStop(1, 'rgba(1, 2, 4, 1)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      // Drift
+      nodes.forEach(n => {
+        n.x += n.vx; n.y += n.vy; n.z += n.vz;
+        const cl = CLUSTERS[n.clusterId];
+        n.vx += (cl.cx - n.x) * 0.0003;
+        n.vy += (cl.cy - n.y) * 0.0003;
+        n.vz += (cl.cz - n.z) * 0.0003;
+      });
+
+      // Neural links
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < nodes.length; i += 3) {
+        const a = nodes[i];
+        const pa = project(a.x, a.y, a.z, width, height);
+        if (pa.scale <= 0) continue;
+
+        for (let j = i + 1; j < Math.min(i + 7, nodes.length); j++) {
+          const b = nodes[j];
+          if (a.clusterId !== b.clusterId) continue;
+          const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+          const distSq = dx * dx + dy * dy + dz * dz;
+          if (distSq < 900) {
+            const pb = project(b.x, b.y, b.z, width, height);
+            const alpha = Math.max(0, 0.22 - distSq / 4500);
+            ctx.strokeStyle = a.color === '#ff007f' || a.color === '#ff2df7'
+              ? `rgba(255, 0, 127, ${alpha * 1.5})`
+              : `rgba(0, 240, 255, ${alpha * 1.5})`;
+            ctx.beginPath();
+            ctx.moveTo(pa.px, pa.py);
+            ctx.lineTo(pb.px, pb.py);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Lasers
+      lasers.forEach(laser => {
+        laser.progress += laser.speed;
+        if (laser.progress > 1) {
+          laser.progress = 0;
+          laser.fromCluster = Math.floor(Math.random() * CLUSTERS.length);
+          laser.toCluster = (laser.fromCluster + 1 + Math.floor(Math.random() * (CLUSTERS.length - 1))) % CLUSTERS.length;
+        }
+
+        const c1 = CLUSTERS[laser.fromCluster];
+        const c2 = CLUSTERS[laser.toCluster];
+
+        const curX = c1.cx + (c2.cx - c1.cx) * laser.progress;
+        const curY = c1.cy + (c2.cy - c1.cy) * laser.progress;
+        const curZ = c1.cz + (c2.cz - c1.cz) * laser.progress;
+
+        const p1 = project(c1.cx, c1.cy, c1.cz, width, height);
+        const p2 = project(c2.cx, c2.cy, c2.cz, width, height);
+        const pCur = project(curX, curY, curZ, width, height);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(p1.px, p1.py);
+        ctx.lineTo(p2.px, p2.py);
+        ctx.stroke();
+
+        const tail = Math.max(0, laser.progress - 0.18);
+        const tX = c1.cx + (c2.cx - c1.cx) * tail;
+        const tY = c1.cy + (c2.cy - c1.cy) * tail;
+        const tZ = c1.cz + (c2.cz - c1.cz) * tail;
+        const pTail = project(tX, tY, tZ, width, height);
+
+        const beamGrad = ctx.createLinearGradient(pTail.px, pTail.py, pCur.px, pCur.py);
+        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        beamGrad.addColorStop(0.7, laser.color);
+        beamGrad.addColorStop(1, '#ffffff');
+
+        ctx.strokeStyle = beamGrad;
+        ctx.lineWidth = laser.thickness;
+        ctx.beginPath();
+        ctx.moveTo(pTail.px, pTail.py);
+        ctx.lineTo(pCur.px, pCur.py);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = laser.color;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(pCur.px, pCur.py, 1.8 * pCur.scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      // Nodes
+      nodes.forEach(n => {
+        const p = project(n.x, n.y, n.z, width, height);
+        if (p.scale <= 0) return;
+        ctx.fillStyle = n.color;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, n.size * p.scale, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Labels
+      CLUSTERS.forEach(cl => {
+        const p = project(cl.cx, cl.cy, cl.cz, width, height);
+        if (p.scale <= 0) return;
+        ctx.save();
+        ctx.translate(p.px, p.py);
+
+        ctx.font = `bold ${Math.max(10, Math.floor(13 * p.scale))}px monospace`;
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = cl.color;
+        ctx.shadowBlur = 8;
+        ctx.fillText(cl.name, 10, -8);
+
+        ctx.font = `${Math.max(8, Math.floor(10 * p.scale))}px monospace`;
+        ctx.fillStyle = cl.color;
+        ctx.shadowBlur = 0;
+        ctx.fillText(`${cl.actions} · ${cl.status}`, 10, 6);
+
+        if (cl.sublabel) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+          ctx.fillText(cl.sublabel, 10, 18);
+        }
+
+        ctx.strokeStyle = cl.color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(0, 0, 4 * p.scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
