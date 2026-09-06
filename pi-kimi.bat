@@ -6,9 +6,9 @@ set "PI_AGENT_DIR=%SCRIPT_DIR%.pi\agent"
 set "KIMI_DIR=%SCRIPT_DIR%..\kimi-k3-in-c"
 
 echo ================================================================================
-echo  [PI AGENT] Standalone Sovereign Runner with KIMI K3 IN C (Local MoE)
+echo  [PI AGENT] Kimi-compatible first-layer bridge + Hydra heavy-work router
 echo ================================================================================
-echo  Active Local Endpoint: http://127.0.0.1:8095 (Kimi K3)
+echo  Bridge Endpoint: http://127.0.0.1:8095 ^| Heavy Inference: Hydra 127.0.0.1:8090
 echo --------------------------------------------------------------------------------
 
 :: Ensure Kimi K3 is running

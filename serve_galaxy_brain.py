@@ -20,7 +20,7 @@ import urllib.error
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 PI_DIR = os.path.dirname(os.path.abspath(__file__))
-HERMES_ROOT = r"C:\Users\Deglu\.hermes"
+HERMES_ROOT = os.path.abspath(os.environ.get("HERMES_ROOT", os.path.join(PI_DIR, "..", "..")))
 MECHA_DIR = os.path.join(HERMES_ROOT, "mechaHD")
 TOOLS_DIR = os.path.join(HERMES_ROOT, "tools")
 TUIOS_DIR = os.path.join(HERMES_ROOT, "tools", "tuios")
@@ -39,13 +39,13 @@ HOST = "127.0.0.1"
 # Service Definitions for 1-Click Operations
 SERVICES_REGISTRY = {
     "kimi_k3": {
-        "name": "Kimi K3 MoE C-Engine",
+        "name": "Kimi First-Layer / Hydra Bridge",
         "port": 8095,
         "dir": os.path.join(TOOLS_DIR, "kimi-k3-in-c"),
         "cmd": ["python", "kimi_k3_service.py"],
         "url": "http://127.0.0.1:8095/v1/models",
         "category": "Inference Engines",
-        "description": "Native C-Engine MoE 1.5T local inference ($0.00 offline)"
+        "description": "OpenAI-compatible bridge; Hydra performs heavy inference, local layer 0 requires verification evidence"
     },
     "hydra_router": {
         "name": "Hydra Task Router",
@@ -350,7 +350,7 @@ def scan_toolbox_items() -> list[dict]:
         return tools_list
         
     known_metadata = {
-        "kimi-k3-in-c": {"name": "Kimi K3 in C", "cat": "Inference", "desc": "Native C-Engine for MoE 1.5T local reasoning ($0.00)", "port": 8095},
+        "kimi-k3-in-c": {"name": "Kimi/Hydra Bridge", "cat": "Inference", "desc": "Hydra-routed heavy inference; local layer 0 status is evidence-gated", "port": 8095},
         "pi": {"name": "Pi Coding Agent", "cat": "Autonomous Coding", "desc": "Sovereign AI pair-programmer & multi-model code architect", "port": 5199},
         "tuios": {"name": "TUIOS Terminal Engine", "cat": "Control & Terminals", "desc": "Multiplexer window manager, real analytics & swarm orchestrator", "port": None},
         "chatterbox": {"name": "Chatterbox Multi-Agent Voice", "cat": "Audio & Speech", "desc": "Realtime AI voice synthesis, STT & interactive telephony", "port": None},
@@ -366,7 +366,7 @@ def scan_toolbox_items() -> list[dict]:
         "instatic": {"name": "Instatic SSG Generator", "cat": "Web & Frontend", "desc": "Blazing-fast static site generator & landing page pipeline", "port": None},
         "openship": {"name": "OpenShip Logistics", "cat": "Ecommerce & Dropship", "desc": "Automated order fulfillment & multi-channel logistics engine", "port": None},
         "agent-bibliotecario": {"name": "Agent Bibliotecario", "cat": "Knowledge & RAG", "desc": "Universal indexer for 46,210+ skills, MCP tools & documentations", "port": None},
-        "swarm_goals": {"name": "Swarm Atomic Goals & Ledger", "cat": "Workflow Governance", "desc": "112 Atomic goals on 14 phases with Merkle DAG ED25519 audit", "port": None},
+        "swarm_goals": {"name": "Swarm Atomic Goals & Ledger", "cat": "Workflow Governance", "desc": "112 registered atomic goals on 14 phases; stored hash-chain records are not cryptographically verified", "port": None},
     }
     
     # Also add root Paperclip & Buzz
@@ -419,7 +419,7 @@ def scan_toolbox_items() -> list[dict]:
     return tools_list
 
 def execute_agent_chat(message: str, model: str = "kimi-k3-moe") -> dict:
-    """Executes chat prompt via Kimi K3 MoE or Hydra Router with live responses."""
+    """Executes chat via the 8095 compatibility bridge or directly through Hydra."""
     start_t = time.time()
     
     # Check if target is Kimi K3 MoE
@@ -454,7 +454,7 @@ def execute_agent_chat(message: str, model: str = "kimi-k3-moe") -> dict:
                     "success": True,
                     "reply": reply,
                     "model": model,
-                    "provider": "Kimi K3 Native C-Engine (:8095)",
+                    "provider": "Kimi-compatible / Hydra Bridge (:8095)",
                     "cost": "$0.00 (Local Offline)",
                     "duration_s": dur,
                     "usage": usage
@@ -462,9 +462,9 @@ def execute_agent_chat(message: str, model: str = "kimi-k3-moe") -> dict:
         except Exception as e:
             return {
                 "success": False,
-                "reply": f"⚠️ Kimi K3 C-Engine Error ({str(e)}). Assicurati che il servizio sulla porta 8095 sia attivo.",
+                "reply": f"Bridge 8095 error ({str(e)}). Verify bridge identity and Hydra availability.",
                 "model": model,
-                "provider": "Kimi K3",
+                "provider": "Kimi/Hydra Bridge",
                 "cost": "$0.00",
                 "duration_s": round(time.time() - start_t, 2)
             }
@@ -917,13 +917,13 @@ def get_swarm_interactions() -> dict:
             },
             {
                 "id": "kimi_k3",
-                "label": "Kimi K3 MoE C-Engine",
-                "role": "Native Local Inference & Reasoner",
+                "label": "Kimi First-Layer / Hydra Bridge",
+                "role": "Evidence-gated local layer + Hydra heavy inference",
                 "type": "inference",
                 "status": "online" if is_port_open(8095) else "standby",
                 "port": 8095,
                 "position": [220, 80, -60],
-                "description": "Native C-Engine MoE 1.5T local reasoning engine ($0.00 offline)"
+                "description": "Heavy inference via Hydra; released Kimi layer 0 only when evidence-verified"
             },
             {
                 "id": "hydra_router",
@@ -940,40 +940,40 @@ def get_swarm_interactions() -> dict:
                 "label": "Cron Scheduler Engine",
                 "role": "Continuous Autonomous Job Dispatcher",
                 "type": "automation",
-                "status": "online",
+                "status": "registered",
                 "port": None,
                 "position": [180, -140, 80],
-                "description": "Autonomous cron execution daemon executing periodic background pipelines"
+                "description": "Cron scheduler definition; runtime requires separate execution evidence"
             },
             {
                 "id": "github_master",
                 "label": "GitHub Master Analyst",
                 "role": "Deep Intelligence & Benchmark Auditor",
                 "type": "swarm_worker",
-                "status": "online",
+                "status": "registered",
                 "port": None,
                 "position": [320, -180, 120],
-                "description": "Active Swarm: deep benchmark audits & CVE vulnerability scans on mrvinx-stack"
+                "description": "Registered benchmark/audit worker definition; not a live process probe"
             },
             {
                 "id": "telegram_gateway",
                 "label": "Telegram Secure Gateway",
                 "role": "Imperial Messaging Control Plane",
                 "type": "gateway",
-                "status": "online",
+                "status": "registered",
                 "port": None,
                 "position": [-230, -120, 60],
-                "description": "End-to-end encrypted Telegram control plane with instant slash commands (/cron, /status, /pi)"
+                "description": "Registered Telegram gateway definition; health is reported by its own service"
             },
             {
                 "id": "agent_bibliotecario",
                 "label": "Agent Bibliotecario",
                 "role": "Multimodal RAG & Knowledge Indexer",
                 "type": "rag",
-                "status": "online",
+                "status": "registered",
                 "port": None,
                 "position": [0, 240, -100],
-                "description": "Vector indexing 46,210+ skills, MCP tools, research docs, and video frames"
+                "description": "Registered knowledge indexer; catalog counts are read separately"
             },
             {
                 "id": "ldg_innovation",
@@ -1000,10 +1000,10 @@ def get_swarm_interactions() -> dict:
                 "label": "Sovereign Watchdog",
                 "role": "Self-Healing Supervisor Daemon",
                 "type": "supervisor",
-                "status": "online",
+                "status": "registered",
                 "port": None,
                 "position": [0, -260, 50],
-                "description": "Background process supervisor auto-healing all 4 core services on crash"
+                "description": "Registered supervisor definition; recent log records are not a process heartbeat"
             }
         ],
         "links": [
@@ -1011,25 +1011,25 @@ def get_swarm_interactions() -> dict:
                 "source": "pi_agent",
                 "target": "kimi_k3",
                 "protocol": "HTTP REST / IPC Socket (:8095)",
-                "reason": "Pi Agent delegates prompt reasoning to Kimi K3 MoE C-Engine for local token inference",
-                "active_traffic": "Live Reasoning Channel",
-                "state": "active"
+                "reason": "Pi Agent calls the compatibility bridge; Hydra handles heavy inference and local layer status remains explicit",
+                "active_traffic": "Configured request path",
+                "state": "configured"
             },
             {
                 "source": "pi_agent",
                 "target": "hydra_router",
                 "protocol": "HTTP REST (:8090)",
-                "reason": "Dynamic multi-model fallback for deep complex tasks requiring cloud reasoning",
-                "active_traffic": "Model Routing Stream",
-                "state": "standby"
+                "reason": "Primary heavy-work multi-model routing path",
+                "active_traffic": "Configured model routing path",
+                "state": "configured"
             },
             {
                 "source": "pi_agent",
                 "target": "cron_engine",
                 "protocol": "SQLite Event Dispatcher",
                 "reason": "Pi Agent schedules, manages, and triggers autonomous cronjobs in executions.db",
-                "active_traffic": "Task Scheduling Bus",
-                "state": "active"
+                "active_traffic": "Configured scheduler path",
+                "state": "configured"
             },
             {
                 "source": "cron_engine",
@@ -1044,8 +1044,8 @@ def get_swarm_interactions() -> dict:
                 "target": "telegram_gateway",
                 "protocol": "Long-Polling / Gateway Webhook",
                 "reason": "Imperial command bridge receiving /cron, /status, /pi and relaying notifications to Imperatore",
-                "active_traffic": "Realtime Message Stream",
-                "state": "active"
+                "active_traffic": "Configured gateway path",
+                "state": "configured"
             },
             {
                 "source": "pi_agent",
@@ -1060,24 +1060,24 @@ def get_swarm_interactions() -> dict:
                 "target": "ldg_innovation",
                 "protocol": "Next.js API & B2B Suite v2 Script",
                 "reason": "Traceability Matrix Phase 1-14 synchronization and B2B OSINT lead extraction",
-                "active_traffic": "Enterprise Sync Channel",
-                "state": "connected"
+                "active_traffic": "Configured integration path",
+                "state": "configured"
             },
             {
                 "source": "pi_agent",
                 "target": "paperclip",
                 "protocol": "Express REST API (:3100)",
                 "reason": "Company governance, task issue checkout, and budget hard-stop invariant control",
-                "active_traffic": "Board Control Stream",
-                "state": "connected"
+                "active_traffic": "Configured board path",
+                "state": "configured"
             },
             {
                 "source": "watchdog",
                 "target": "pi_agent",
                 "protocol": "Process Heartbeat & Port Polling",
                 "reason": "Supervises Telegram Gateway, Kimi K3, Galaxy Brain, and Hydra Router with auto-respawn",
-                "active_traffic": "Health Verification Pulse (5s interval)",
-                "state": "active"
+                "active_traffic": "Configured health-check path",
+                "state": "registered"
             }
         ]
     }

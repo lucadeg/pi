@@ -7,10 +7,10 @@ $env:PI_CODING_AGENT_DIR = Join-Path $scriptDir ".pi\agent"
 $env:PI_AGENT_DIR = Join-Path $scriptDir ".pi\agent"
 
 Write-Host "================================================================================" -ForegroundColor Cyan
-Write-Host " [PI AGENT] Standalone Runner coupled with KIMI K3 IN C (Local MoE)" -ForegroundColor Green
+Write-Host " [PI AGENT] Kimi-compatible bridge with gated local layer evidence" -ForegroundColor Green
 Write-Host "================================================================================" -ForegroundColor Cyan
-Write-Host " Active Backend: http://127.0.0.1:8095 (Kimi K3 Local Inference Engine)" -ForegroundColor Yellow
-Write-Host " Model: kimi-k3-moe | Context: 128K | Cost: $0.00 (Zero API Cost)" -ForegroundColor Gray
+Write-Host " Endpoint: http://127.0.0.1:8095 | Heavy work: Hydra Router 127.0.0.1:8090" -ForegroundColor Yellow
+Write-Host " Model alias: kimi-k3-moe | Local layer is used only after checkpoint verification" -ForegroundColor Gray
 Write-Host "--------------------------------------------------------------------------------`n"
 
 # Ensure Kimi K3 service is online

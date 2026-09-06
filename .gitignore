@@ -89,3 +89,6 @@ test_pi_kimi.cjs
 !schema.prisma
 !migrations/
 !*.sql
+
+*.err
+*.out

@@ -54,6 +54,18 @@ if /i "%~1"=="--gemini" (
     shift
     goto parse_args
 )
+if /i "%~1"=="--proxima" (
+    set "SELECTED_PROVIDER=hydra-router"
+    set "SELECTED_MODEL=chatgpt"
+    shift
+    goto parse_args
+)
+if /i "%~1"=="--chatgpt" (
+    set "SELECTED_PROVIDER=hydra-router"
+    set "SELECTED_MODEL=chatgpt"
+    shift
+    goto parse_args
+)
 if /i "%~1"=="--r1" (
     set "SELECTED_PROVIDER=hydra-router"
     set "SELECTED_MODEL=deepseek-r1"
@@ -73,14 +85,19 @@ goto parse_args
 :run_pi
 REM Auto-detect provider based on model name
 if /i "%SELECTED_MODEL%"=="auto" set "SELECTED_PROVIDER=hydra-router"
+if /i "%SELECTED_MODEL%"=="chatgpt" set "SELECTED_PROVIDER=hydra-router"
+if /i "%SELECTED_MODEL%"=="proxima" (
+    set "SELECTED_PROVIDER=hydra-router"
+    set "SELECTED_MODEL=chatgpt"
+)
 if /i "%SELECTED_MODEL%"=="gemini-2.5-flash" set "SELECTED_PROVIDER=hydra-router"
 if /i "%SELECTED_MODEL%"=="gemini-3.5-flash" set "SELECTED_PROVIDER=hydra-router"
 if /i "%SELECTED_MODEL%"=="claude-sonnet-4-6" set "SELECTED_PROVIDER=hydra-router"
 if /i "%SELECTED_MODEL%"=="deepseek-r1" set "SELECTED_PROVIDER=hydra-router"
 if /i "%SELECTED_MODEL%"=="llama-3.3-70b" set "SELECTED_PROVIDER=hydra-router"
-if /i "%SELECTED_MODEL%"=="chatgpt" set "SELECTED_PROVIDER=hydra-router"
 if /i "%SELECTED_MODEL%"=="kimi-k3-moe" set "SELECTED_PROVIDER=kimi-k3"
 if /i "%SELECTED_MODEL%"=="qwen2.5-coder:3b" set "SELECTED_PROVIDER=kimi-k3"
+
 
 echo.
 echo =========================================================================

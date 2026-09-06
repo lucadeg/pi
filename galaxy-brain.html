@@ -140,6 +140,24 @@
       font-weight: 700;
     }
 
+    @media (max-width: 1450px) {
+      #top-header {
+        height: 76px;
+        flex-wrap: wrap;
+        align-content: center;
+        gap: 4px;
+        padding: 4px 10px;
+      }
+      .top-left-stats,
+      .top-right-actions {
+        width: 100%;
+        justify-content: center;
+      }
+      .top-left-stats { gap: 12px; }
+      .top-right-actions { gap: 6px; }
+      .btn-top-action { padding: 3px 8px; font-size: 10px; }
+    }
+
     /* Sub-ticker Ticker Line */
     #sub-ticker {
       height: 24px;
@@ -932,18 +950,18 @@
       <div class="pill-swarm">
         <span style="font-size:12px;">🐝</span> PI SOVEREIGN BRAIN
       </div>
-      <div class="stat-metric"><span>NODES:</span> <strong class="cyan" id="stat-nodes">10</strong></div>
-      <div class="stat-metric"><span>ACTIVE CRON:</span> <strong class="green" id="stat-cron-count">1</strong></div>
-      <div class="stat-metric"><span>SESSIONS:</span> <strong class="yellow" id="stat-sessions">114</strong></div>
-      <div class="stat-metric"><span>LEDGER ACTIONS:</span> <strong class="purple" id="stat-ledger-actions">31</strong></div>
+      <div class="stat-metric"><span>TOPOLOGY NODES:</span> <strong class="cyan" id="stat-nodes">N/D</strong></div>
+      <div class="stat-metric"><span>REGISTERED CRON:</span> <strong class="green" id="stat-cron-count">N/D</strong></div>
+      <div class="stat-metric"><span>SESSIONS:</span> <strong class="yellow" id="stat-sessions">N/D</strong></div>
+      <div class="stat-metric"><span>LOG RECORDS:</span> <strong class="purple" id="stat-ledger-actions">N/D</strong></div>
       <div class="stat-metric"><span>SWARM BUS:</span> <strong class="green">NOSTR NIP-29</strong></div>
     </div>
 
     <div class="top-right-actions">
       <button class="btn-top-action" onclick="openChatModal()">💬 Pi Agent REPL</button>
       <button class="btn-top-action" onclick="openKnowledgeModal()">📚 Reference Hub</button>
-      <button class="btn-top-action" onclick="openMechaModal()">🏢 MechaHD (28)</button>
-      <button class="btn-top-action" onclick="openToolboxModal()">🧰 Toolbox (72)</button>
+      <button class="btn-top-action" id="mecha-button" onclick="openMechaModal()">🏢 MechaHD N/D</button>
+      <button class="btn-top-action" id="toolbox-button" onclick="openToolboxModal()">🧰 Toolbox N/D</button>
       <button class="btn-top-action" onclick="switchCockpitTab('cronjobs')" style="border-color:var(--yellow); color:var(--yellow-bright);">⏱️ Deep Cronjob</button>
       <button class="btn-top-action" onclick="startAllServices()" style="background:var(--green); color:#000; font-weight:700;">⚡ 1-Click All Online</button>
     </div>
@@ -952,9 +970,9 @@
   <!-- Sub-ticker -->
   <div id="sub-ticker">
     <div class="ticker-content">
-      <div class="ticker-item"><div class="ticker-dot pulse"></div> <span id="ticker-status-text">Kimi K3 Native C-Engine MoE active on port 8095 ($0.00) · 104 Sovereign Requirements Matrix Synchronized</span></div>
+      <div class="ticker-item"><div class="ticker-dot pulse"></div> <span id="ticker-status-text">Runtime status loading from live service probes…</span></div>
     </div>
-    <div style="color:var(--text-dim); font-size:9.5px;" id="ticker-time">2026-08-26 12:40:00</div>
+    <div style="color:var(--text-dim); font-size:9.5px;" id="ticker-time">N/D</div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════════
@@ -1004,10 +1022,10 @@
           📊 OVERVIEW TELEMETRY (6-PANEL)
         </button>
         <button class="cockpit-tab-btn" id="btn-tab-cronjobs" onclick="switchCockpitTab('cronjobs')">
-          ⏱️ CRONJOBS ATTIVI & PIPELINE (COSA & COME) <span class="badge-pill warn" id="badge-cron-count">1 ATTIVO</span>
+          ⏱️ CRONJOBS REGISTRATI & PIPELINE (COSA & COME) <span class="badge-pill warn" id="badge-cron-count">N/D</span>
         </button>
         <button class="cockpit-tab-btn" id="btn-tab-ledger" onclick="switchCockpitTab('ledger')">
-          📜 LOGS NANOMETRICI GRANULARI <span class="badge-pill info" id="badge-ledger-count">31 ENTRIES</span>
+          📜 LOGS GRANULARI REGISTRATI <span class="badge-pill info" id="badge-ledger-count">N/D</span>
         </button>
         <button class="cockpit-tab-btn" id="btn-tab-forecast" onclick="switchCockpitTab('forecast')">
           🔮 PROSSIMI TASK & PREVISIONALE <span class="badge-pill success">PROX: 04:00 AM</span>
@@ -1030,7 +1048,7 @@
         <!-- Col 1: Ledger Quick Stream -->
         <div class="dash-column">
           <div class="col-header">
-            <span class="col-title">RUN LOG (IMMUTABLE LEDGER)</span>
+            <span class="col-title">RUN LOG (STORED RECORDS)</span>
             <span class="col-badge cyan" onclick="switchCockpitTab('ledger')" style="cursor:pointer;">ESPANDI ➔</span>
           </div>
           <div class="log-stream" id="ledger-stream-container"></div>
@@ -1040,23 +1058,23 @@
         <div class="dash-column">
           <div class="col-header">
             <span class="col-title">SQLITE DATABASES</span>
-            <span class="col-badge green">ALL WAL</span>
+            <span class="col-badge green">FILES ON DISK</span>
           </div>
           <div class="db-list">
             <div class="db-item">
-              <div class="db-row"><span>state.db</span><span style="color:var(--cyan-bright);" id="db-state-size">3.61 MB</span></div>
+              <div class="db-row"><span>state.db</span><span style="color:var(--cyan-bright);" id="db-state-size">N/D</span></div>
               <div class="db-bar"><div class="db-bar-fill" style="width: 70%; background: var(--cyan);"></div></div>
             </div>
             <div class="db-item">
-              <div class="db-row"><span>executions.db</span><span style="color:var(--yellow-bright);">0.25 MB</span></div>
+              <div class="db-row"><span>executions.db</span><span style="color:var(--yellow-bright);" id="db-executions-size">N/D</span></div>
               <div class="db-bar"><div class="db-bar-fill" style="width: 40%; background: var(--yellow);"></div></div>
             </div>
             <div class="db-item">
-              <div class="db-row"><span>projects.db</span><span style="color:var(--green-bright);">0.68 MB</span></div>
+              <div class="db-row"><span>projects.db</span><span style="color:var(--green-bright);" id="db-projects-size">N/D</span></div>
               <div class="db-bar"><div class="db-bar-fill" style="width: 50%; background: var(--green);"></div></div>
             </div>
             <div class="db-item">
-              <div class="db-row"><span>github-master.db</span><span style="color:var(--purple);">1.42 MB</span></div>
+              <div class="db-row"><span>github-master-catalog.db</span><span style="color:var(--purple);" id="db-github-size">N/D</span></div>
               <div class="db-bar"><div class="db-bar-fill" style="width: 60%; background: var(--purple);"></div></div>
             </div>
           </div>
@@ -1066,11 +1084,11 @@
         <div class="dash-column">
           <div class="col-header">
             <span class="col-title">WORKFLOW 1-14 AUDIT</span>
-            <span class="col-badge green">100% DOD</span>
+            <span class="col-badge cyan">EVIDENCE STATUS</span>
           </div>
           <div class="workflow-radar-box">
             <canvas id="radar-canvas"></canvas>
-            <div class="workflow-subtext" style="font-size:9px; color:var(--cyan-bright); text-align:center; margin-top:2px;">14/14 PHASES ACTIVE</div>
+            <div id="workflow-evidence-status" class="workflow-subtext" style="font-size:9px; color:var(--cyan-bright); text-align:center; margin-top:2px;">N/D — REGISTRY STATUS</div>
           </div>
         </div>
 
@@ -1078,15 +1096,15 @@
         <div class="dash-column">
           <div class="col-header">
             <span class="col-title">TOKEN ECONOMICS</span>
-            <span class="col-badge green">$0.00 LOCAL</span>
+            <span class="col-badge green">RECORDED USAGE</span>
           </div>
           <div class="token-metrics-grid">
-            <div class="token-row"><span class="token-label">Input Tokens:</span><span class="token-val" id="tok-input">404,601</span></div>
-            <div class="token-row"><span class="token-label">Output Tokens:</span><span class="token-val" id="tok-output">11,141</span></div>
-            <div class="token-row"><span class="token-label">Cached Tokens:</span><span class="token-val" style="color:var(--cyan-bright);" id="tok-cached">89,576</span></div>
-            <div class="token-row"><span class="token-label">Reasoning Tokens:</span><span class="token-val" style="color:var(--purple);" id="tok-reasoning">18,450</span></div>
-            <div class="token-row"><span class="token-label">Tool Calls Total:</span><span class="token-val" id="tok-tools">31</span></div>
-            <div class="token-row"><span class="token-label">Cache Hit Ratio:</span><span class="token-val" style="color:var(--green-bright);" id="tok-ratio">18.13%</span></div>
+            <div class="token-row"><span class="token-label">Input Tokens:</span><span class="token-val" id="tok-input">N/D</span></div>
+            <div class="token-row"><span class="token-label">Output Tokens:</span><span class="token-val" id="tok-output">N/D</span></div>
+            <div class="token-row"><span class="token-label">Cached Tokens:</span><span class="token-val" style="color:var(--cyan-bright);" id="tok-cached">N/D</span></div>
+            <div class="token-row"><span class="token-label">Reasoning Tokens:</span><span class="token-val" style="color:var(--purple);" id="tok-reasoning">N/D</span></div>
+            <div class="token-row"><span class="token-label">Tool Calls Total:</span><span class="token-val" id="tok-tools">N/D</span></div>
+            <div class="token-row"><span class="token-label">Cache Hit Ratio:</span><span class="token-val" style="color:var(--green-bright);" id="tok-ratio">N/D</span></div>
           </div>
         </div>
 
@@ -1094,15 +1112,15 @@
         <div class="dash-column">
           <div class="col-header">
             <span class="col-title">HARDWARE SENSORS</span>
-            <span class="col-badge cyan" id="hw-cpu-badge">100% CPU</span>
+            <span class="col-badge cyan" id="hw-cpu-badge">N/D</span>
           </div>
           <div class="hw-metrics">
             <div class="hw-gauge">
-              <div class="hw-label"><span>RAM</span><span id="hw-ram-val">11.72 / 17.88 GB</span></div>
+              <div class="hw-label"><span>RAM</span><span id="hw-ram-val">N/D</span></div>
               <div class="db-bar"><div class="db-bar-fill" id="hw-ram-bar" style="width: 65%; background: var(--cyan);"></div></div>
             </div>
             <div class="hw-gauge">
-              <div class="hw-label"><span>DISK</span><span id="hw-disk-val">420.04 GB Free</span></div>
+              <div class="hw-label"><span>DISK</span><span id="hw-disk-val">N/D</span></div>
               <div class="db-bar"><div class="db-bar-fill" id="hw-disk-bar" style="width: 75%; background: var(--green);"></div></div>
             </div>
           </div>
@@ -1112,7 +1130,7 @@
         <div class="dash-column">
           <div class="col-header">
             <span class="col-title">SERVICES & PORTS</span>
-            <span class="col-badge green" id="badge-services-online">4 / 8 ONLINE</span>
+            <span class="col-badge green" id="badge-services-online">N/D</span>
           </div>
           <div class="services-scroll-list" id="services-row-container"></div>
         </div>
@@ -1180,7 +1198,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:11px; color:var(--text-dim);">SELECT TARGET AI MODEL:</span>
           <select id="modal-model-select" style="background:#0f172a; border:1px solid var(--border-cyan); color:var(--cyan-bright); padding:4px 8px; border-radius:4px; font-family:'JetBrains Mono'; font-size:11px;">
-            <option value="kimi-k3-moe">Kimi K3 MoE (Local C-Engine :8095 - $0.00)</option>
+            <option value="kimi-k3-moe">Kimi-compatible / Hydra Bridge (:8095)</option>
             <option value="claude-sonnet-4-6">Hydra: Claude Sonnet 4.6 (:8090)</option>
             <option value="gemini-2.5-flash">Hydra: Gemini 2.5 Flash (:8090)</option>
             <option value="deepseek-r1">Hydra: DeepSeek R1 Reasoning (:8090)</option>
@@ -1334,20 +1352,20 @@
 
     const ENTITIES = [
       { id: "pi_agent", name: "Pi Coding Agent", role: "Autonomous Code Architect", color: 0x06b6d4, size: 3.6, pos: [0, 0, 0], port: 5199, status: "ONLINE", desc: "Central coordinator routing user commands, code audits and workflows" },
-      { id: "kimi_k3", name: "Kimi K3 MoE C-Engine", role: "1.5T Local Inference ($0.00)", color: 0x10b981, size: 3.0, pos: [26, 12, -18], port: 8095, status: "ONLINE", desc: "Native C-Engine MoE 1.5T local reasoning engine ($0.00 offline)" },
+      { id: "kimi_k3", name: "Kimi First-Layer / Hydra Bridge", role: "Evidence-gated local layer + Hydra heavy inference", color: 0x10b981, size: 3.0, pos: [26, 12, -18], port: 8095, status: "PROBING", desc: "Local layer 0 is active only after checkpoint verification; heavy inference routes through Hydra" },
       { id: "hydra_router", name: "Hydra Task Router", role: "Multi-Model Dynamic Router", color: 0x38bdf8, size: 3.0, pos: [-28, 14, -12], port: 8090, status: "ONLINE", desc: "Multi-model cloud orchestrator routing to Claude 3.7, Gemini 2.5, DeepSeek & LLaMA" },
-      { id: "cron_engine", name: "Cron Scheduler Engine", role: "Continuous Job Dispatcher", color: 0xf59e0b, size: 2.8, pos: [22, -18, 10], port: null, status: "ONLINE", desc: "Autonomous cron execution daemon executing periodic background pipelines" },
-      { id: "github_master", name: "GitHub Master Analyst", role: "Deep Intelligence & Benchmark Auditor", color: 0xfbbf24, size: 2.6, pos: [38, -22, 16], port: null, status: "ONLINE", desc: "Active Swarm: deep benchmark audits & CVE vulnerability scans on mrvinx-stack" },
-      { id: "telegram_gateway", name: "Telegram Secure Gateway", role: "Imperial Messaging Control Plane", color: 0x38bdf8, size: 2.8, pos: [-26, -16, 12], port: null, status: "ONLINE", desc: "End-to-end encrypted Telegram control plane with instant slash commands (/cron, /status, /pi)" },
-      { id: "agent_bibliotecario", name: "Agent Bibliotecario", role: "Multimodal RAG & Knowledge Indexer", color: 0x34d399, size: 2.5, pos: [2, 28, -20], port: null, status: "ONLINE", desc: "Vector indexing 46,210+ skills, MCP tools, research docs, and video frames" },
+      { id: "cron_engine", name: "Cron Scheduler Engine", role: "Continuous Job Dispatcher", color: 0xf59e0b, size: 2.8, pos: [22, -18, 10], port: null, status: "REGISTERED", desc: "Scheduler definition; runtime requires separate execution evidence" },
+      { id: "github_master", name: "GitHub Master Analyst", role: "Deep Intelligence & Benchmark Auditor", color: 0xfbbf24, size: 2.6, pos: [38, -22, 16], port: null, status: "REGISTERED", desc: "Worker definition; not a live process probe" },
+      { id: "telegram_gateway", name: "Telegram Secure Gateway", role: "Messaging Control Plane", color: 0x38bdf8, size: 2.8, pos: [-26, -16, 12], port: null, status: "REGISTERED", desc: "Gateway definition; runtime health is reported separately" },
+      { id: "agent_bibliotecario", name: "Agent Bibliotecario", role: "RAG & Knowledge Indexer", color: 0x34d399, size: 2.5, pos: [2, 28, -20], port: null, status: "REGISTERED", desc: "Indexer definition; catalog counts are read separately" },
       { id: "ldg_innovation", name: "LDG Innovation Hub", role: "Next.js 15 Platform & B2B Suite", color: 0xf59e0b, size: 2.7, pos: [-18, -26, -15], port: 3000, status: "STANDBY", desc: "Enterprise portal with B2B Acquisition Suite v2, OSINT extraction & 104+ requirements" },
       { id: "paperclip", name: "Paperclip Control Plane", role: "AI-Agent Company Management", color: 0xd946ef, size: 2.6, pos: [18, 24, 15], port: 3100, status: "STANDBY", desc: "AI-Agent company control plane with governance budgets, issue checkout & board UI" },
-      { id: "watchdog", name: "Sovereign Watchdog", role: "Self-Healing Supervisor Daemon", color: 0xef4444, size: 2.6, pos: [0, -32, 6], port: null, status: "ONLINE", desc: "Background process supervisor auto-healing all 4 core services on crash" }
+      { id: "watchdog", name: "Sovereign Watchdog", role: "Supervisor Definition", color: 0xef4444, size: 2.6, pos: [0, -32, 6], port: null, status: "REGISTERED", desc: "Supervisor definition; recent log rows are not a process heartbeat" }
     ];
 
     const INTERACTIVE_LINKS = [
-      { source: "pi_agent", target: "kimi_k3", color: 0x10b981, protocol: "HTTP REST / IPC Socket (:8095)", reason: "Pi Agent delegates prompt reasoning to Kimi K3 MoE C-Engine for local token inference", traffic: "Live Reasoning Channel" },
-      { source: "pi_agent", target: "hydra_router", color: 0x38bdf8, protocol: "HTTP REST (:8090)", reason: "Dynamic multi-model fallback for complex tasks requiring cloud reasoning", traffic: "Model Routing Stream" },
+      { source: "pi_agent", target: "kimi_k3", color: 0x10b981, protocol: "HTTP REST (:8095)", reason: "Compatibility bridge exposes local-layer evidence and forwards heavy inference to Hydra", traffic: "Configured bridge path" },
+      { source: "pi_agent", target: "hydra_router", color: 0x38bdf8, protocol: "HTTP REST (:8090)", reason: "Primary heavy-work multi-model routing", traffic: "Configured model path" },
       { source: "pi_agent", target: "cron_engine", color: 0xf59e0b, protocol: "SQLite Event Dispatcher", reason: "Pi Agent schedules, manages, and triggers autonomous cronjobs in executions.db", traffic: "Task Scheduling Bus" },
       { source: "cron_engine", target: "github_master", color: 0xfbbf24, protocol: "Subprocess Runner (deep_intelligence_runner.py)", reason: "Cron Engine spawns continuous benchmark audits and security scans on GitHub Master repos", traffic: "Daily 04:00 AM Pipeline" },
       { source: "pi_agent", target: "telegram_gateway", color: 0x38bdf8, protocol: "Long-Polling / Gateway Webhook", reason: "Imperial command bridge receiving /cron, /status, /pi and relaying notifications to Imperatore", traffic: "Realtime Message Stream" },
@@ -1740,7 +1758,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0; margin-bottom:8px; border-bottom:1px solid var(--border-dim); padding-bottom:8px;">
           <div style="font-size:12px; font-weight:700; color:var(--cyan-bright); display:flex; align-items:center; gap:8px;">
             <span>⏱️ CRONJOBS ATTIVI & PIPELINE OPERATIVE (${jobs.length})</span>
-            <span class="badge-pill success">ALL WAL</span>
+            <span class="badge-pill success">SOURCE: JOB REGISTRY</span>
           </div>
           <button class="btn-top-action" onclick="switchCockpitTab('overview')" style="background:rgba(239,68,68,0.15); border-color:var(--red); color:#fff; font-weight:700;">✕ CHIUDI / PANORAMICA (ESC)</button>
         </div>
@@ -2160,8 +2178,8 @@
         const item = document.createElement('div');
         item.className = 'log-entry';
         item.innerHTML = `
-          <div class="log-time">${r.timestamp || '12:30:00'} [${r.subsystem || 'EXEC'}]</div>
-          <div class="log-agent">${r.actor || 'agent'}: <span style="color:#fff;">${r.action || 'action'}</span></div>
+          <div class="log-time">${r.timestamp || 'N/D'} [${r.subsystem || 'RECORDED'}]</div>
+          <div class="log-agent">${r.actor || 'N/D'}: <span style="color:#fff;">${r.action || 'N/D'}</span></div>
           <div class="log-obj">${(r.details || '').slice(0, 50)}...</div>
         `;
         item.onclick = () => switchCockpitTab('ledger');
@@ -2184,7 +2202,7 @@
           data: {
             labels: ['01_Req', '02_Arch', '03_API', '04_Core', '05_Sec', '06_TUI', '07_B2B', '08_Prt', '09_DAG', '10_DoD', '11_K3', '12_Hyd', '13_Ops', '14_Mem'],
             datasets: [{
-              data: [95, 90, 85, 95, 92, 90, 88, 92, 95, 90, 95, 90, 88, 100],
+              data: new Array(14).fill(0),
               backgroundColor: 'rgba(6, 182, 212, 0.25)',
               borderColor: '#06b6d4',
               pointBackgroundColor: '#38bdf8',
@@ -2211,6 +2229,25 @@
         });
       } catch (err) {
         console.warn('initRadarChart skipped:', err);
+      }
+    }
+
+    function updateWorkflowEvidence(atomicGoals) {
+      const phases = Array.isArray(atomicGoals?.workflow_phases_breakdown)
+        ? atomicGoals.workflow_phases_breakdown.slice(0, 14)
+        : [];
+      const status = document.getElementById('workflow-evidence-status');
+      if (!phases.length) {
+        if (status) status.innerText = 'N/D — REGISTRY STATUS';
+        return;
+      }
+      const values = phases.map(p => Number.isFinite(Number(p.completion_pct)) ? Number(p.completion_pct) : 0);
+      const complete = phases.filter(p => Number(p.total_goals) > 0 && Number(p.done_goals) === Number(p.total_goals)).length;
+      if (status) status.innerText = `${complete}/${phases.length} PHASES COMPLETE — REGISTRY`;
+      if (radarChart) {
+        radarChart.data.labels = phases.map(p => String(p.phase_index).padStart(2, '0'));
+        radarChart.data.datasets[0].data = values;
+        radarChart.update();
       }
     }
 
@@ -2411,7 +2448,7 @@
             const statCron = document.getElementById('stat-cron-count');
             if (statCron) statCron.innerText = jobsCount;
             const badgeCron = document.getElementById('badge-cron-count');
-            if (badgeCron) badgeCron.innerText = `${jobsCount} ATTIVO`;
+            if (badgeCron) badgeCron.innerText = `${jobsCount} REGISTRATI`;
 
             if (document.getElementById('view-cronjobs')?.classList.contains('active')) {
               renderDetailedCronjobs();
@@ -2429,30 +2466,70 @@
         .then(tRes => {
           if (tRes && typeof tRes === 'object') {
             globalTelemetry = tRes;
+            const clock = document.getElementById('ticker-time');
+            if (clock) clock.innerText = new Date().toLocaleString('it-IT');
+            const ticker = document.getElementById('ticker-status-text');
+            if (ticker) ticker.innerText = globalTelemetry.error
+              ? `Telemetry unavailable: ${globalTelemetry.error}`
+              : `Telemetry live · source ${globalTelemetry.hardware?.sensor_source || 'local bridge'}`;
+
+            const topologyNodes = Array.isArray(ENTITIES) ? ENTITIES.length : null;
+            const statNodes = document.getElementById('stat-nodes');
+            if (statNodes) statNodes.innerText = topologyNodes ?? 'N/D';
+
+            const stateDb = globalTelemetry.database?.state_db || {};
+            const statSessions = document.getElementById('stat-sessions');
+            if (statSessions) statSessions.innerText = stateDb.sessions_count ?? 'N/D';
+
             if (globalTelemetry.hardware) {
+              const hw = globalTelemetry.hardware;
               const cpuBadge = document.getElementById('hw-cpu-badge');
-              if (cpuBadge) cpuBadge.innerText = `${globalTelemetry.hardware.cpu_percent}% CPU`;
+              if (cpuBadge) cpuBadge.innerText = Number.isFinite(Number(hw.cpu_percent)) ? `${hw.cpu_percent}% CPU` : 'N/D';
               const ramVal = document.getElementById('hw-ram-val');
-              if (ramVal) ramVal.innerText = `${globalTelemetry.hardware.ram_used_gb} / ${globalTelemetry.hardware.ram_total_gb} GB`;
+              const ramUsed = Number(hw.used_ram_gb);
+              const ramTotal = Number(hw.total_ram_gb);
+              if (ramVal) ramVal.innerText = Number.isFinite(ramUsed) && Number.isFinite(ramTotal) ? `${ramUsed} / ${ramTotal} GB` : 'N/D';
               const ramBar = document.getElementById('hw-ram-bar');
-              if (ramBar) ramBar.style.width = `${(globalTelemetry.hardware.ram_used_gb / globalTelemetry.hardware.ram_total_gb) * 100}%`;
+              if (ramBar) ramBar.style.width = Number.isFinite(ramUsed) && ramTotal > 0 ? `${Math.min(100, (ramUsed / ramTotal) * 100)}%` : '0%';
               const diskVal = document.getElementById('hw-disk-val');
-              if (diskVal) diskVal.innerText = `${globalTelemetry.hardware.disk_free_gb} GB Free`;
+              const driveC = globalTelemetry.database?.storage_subsystem?.drive_c;
+              if (diskVal) diskVal.innerText = Number.isFinite(Number(driveC?.free_gb)) ? `${driveC.free_gb} GB Free` : 'N/D';
             }
-            if (globalTelemetry.tokens) {
+            const sizes = globalTelemetry.database?.storage_subsystem?.database_sizes_mb || {};
+            const dbMappings = [
+              ['db-state-size', 'state.db'],
+              ['db-executions-size', 'executions.db'],
+              ['db-projects-size', 'projects.db'],
+              ['db-github-size', 'github-master-catalog.db']
+            ];
+            dbMappings.forEach(([id, name]) => {
+              const el = document.getElementById(id);
+              if (el) el.innerText = Number.isFinite(Number(sizes[name])) ? `${sizes[name]} MB` : 'N/D';
+            });
+
+            const tokens = {
+              input_tokens: stateDb.input_tokens_total,
+              output_tokens: stateDb.output_tokens_total,
+              cached_tokens: stateDb.cache_tokens_total,
+              reasoning_tokens: stateDb.reasoning_tokens_total,
+              tool_calls_total: stateDb.tool_calls_total,
+              cache_hit_ratio: stateDb.cache_hit_ratio_percent
+            };
+            if (Object.keys(stateDb).length) {
               const inTok = document.getElementById('tok-input');
-              if (inTok && globalTelemetry.tokens.input_tokens) inTok.innerText = Number(globalTelemetry.tokens.input_tokens).toLocaleString();
+              if (inTok) inTok.innerText = Number.isFinite(Number(tokens.input_tokens)) ? Number(tokens.input_tokens).toLocaleString() : 'N/D';
               const outTok = document.getElementById('tok-output');
-              if (outTok && globalTelemetry.tokens.output_tokens) outTok.innerText = Number(globalTelemetry.tokens.output_tokens).toLocaleString();
+              if (outTok) outTok.innerText = Number.isFinite(Number(tokens.output_tokens)) ? Number(tokens.output_tokens).toLocaleString() : 'N/D';
               const cTok = document.getElementById('tok-cached');
-              if (cTok && globalTelemetry.tokens.cached_tokens) cTok.innerText = Number(globalTelemetry.tokens.cached_tokens).toLocaleString();
+              if (cTok) cTok.innerText = Number.isFinite(Number(tokens.cached_tokens)) ? Number(tokens.cached_tokens).toLocaleString() : 'N/D';
               const rTok = document.getElementById('tok-reasoning');
-              if (rTok && globalTelemetry.tokens.reasoning_tokens) rTok.innerText = Number(globalTelemetry.tokens.reasoning_tokens).toLocaleString();
+              if (rTok) rTok.innerText = Number.isFinite(Number(tokens.reasoning_tokens)) ? Number(tokens.reasoning_tokens).toLocaleString() : 'N/D';
               const tcTot = document.getElementById('tok-tools');
-              if (tcTot && globalTelemetry.tokens.tool_calls_total) tcTot.innerText = Number(globalTelemetry.tokens.tool_calls_total).toLocaleString();
+              if (tcTot) tcTot.innerText = Number.isFinite(Number(tokens.tool_calls_total)) ? Number(tokens.tool_calls_total).toLocaleString() : 'N/D';
               const cRatio = document.getElementById('tok-ratio');
-              if (cRatio && globalTelemetry.tokens.cache_hit_ratio) cRatio.innerText = `${globalTelemetry.tokens.cache_hit_ratio}%`;
+              if (cRatio) cRatio.innerText = Number.isFinite(Number(tokens.cache_hit_ratio)) ? `${tokens.cache_hit_ratio}%` : 'N/D';
             }
+            updateWorkflowEvidence(globalTelemetry.atomic_goals);
           }
         })
         .catch(() => {});
@@ -2461,12 +2538,20 @@
     async function initData() {
       fetch(`${API_BASE}/api/mecha-projects`)
         .then(r => r.json())
-        .then(pRes => { if (pRes) globalMecha = pRes; })
+        .then(pRes => {
+          if (pRes) globalMecha = pRes;
+          const el = document.getElementById('mecha-button');
+          if (el) el.innerText = `🏢 MechaHD ${Array.isArray(globalMecha) ? globalMecha.length : 'N/D'}`;
+        })
         .catch(() => {});
 
       fetch(`${API_BASE}/api/toolbox`)
         .then(r => r.json())
-        .then(tRes => { if (tRes) globalToolbox = tRes; })
+        .then(tRes => {
+          if (tRes) globalToolbox = tRes;
+          const el = document.getElementById('toolbox-button');
+          if (el) el.innerText = `🧰 Toolbox ${Array.isArray(globalToolbox) ? globalToolbox.length : 'N/D'}`;
+        })
         .catch(() => {});
 
       try { initRadarChart(); } catch (e) {}
