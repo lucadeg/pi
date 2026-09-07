@@ -19,6 +19,14 @@ if exist "%KIMI_DIR%\ensure_kimi_service.py" (
     )
 )
 
+:: Ensure Windows Console VT input is enabled and QuickEdit is disabled
+if exist "%SCRIPT_DIR%configure_console.py" (
+    where python >nul 2>nul
+    if not errorlevel 1 (
+        python "%SCRIPT_DIR%configure_console.py" >nul 2>nul
+    )
+)
+
 set "CLI_DIST=%SCRIPT_DIR%packages\coding-agent\dist\cli.js"
 set "CLI_TSX=%SCRIPT_DIR%packages\coding-agent\src\cli.ts"
 

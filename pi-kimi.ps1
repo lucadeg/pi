@@ -23,6 +23,12 @@ if (Test-Path -LiteralPath $kimiEnsureScript) {
     }
 }
 
+# Ensure Windows Console VT input is enabled and QuickEdit is disabled
+$consoleConfig = Join-Path $scriptDir "configure_console.py"
+if (Test-Path -LiteralPath $consoleConfig) {
+    try { & python $consoleConfig *>$null } catch {}
+}
+
 $cliDist = Join-Path $scriptDir "packages\coding-agent\dist\cli.js"
 $cliTsx = Join-Path $scriptDir "packages\coding-agent\src\cli.ts"
 $tsxBin = Join-Path $scriptDir "node_modules\.bin\tsx.cmd"

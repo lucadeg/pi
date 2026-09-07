@@ -382,11 +382,21 @@ export class ProcessTerminal implements Terminal {
 			for (const modulePath of candidates) {
 				try {
 					const helper = cjsRequire(modulePath) as { enableVirtualTerminalInput?: () => boolean };
-					helper.enableVirtualTerminalInput?.();
-					return;
+					if (helper.enableVirtualTerminalInput?.()) {
+						return;
+					}
 				} catch {
 					// Try the next possible packaging location.
 				}
+			}
+
+			// Fallback for Windows console: configure CONIN$ directly via kernel32 SetConsoleMode
+			try {
+				const { execFileSync } = cjsRequire("node:child_process") as typeof import("node:child_process");
+				const pyCode = 'import ctypes;k=ctypes.windll.kernel32;h=k.CreateFileW("CONIN$",0xC0000000,3,None,3,0,None);m=ctypes.c_uint32();k.GetConsoleMode(h,ctypes.byref(m));k.SetConsoleMode(h,(m.value&~0x40)|0x80|0x200);k.CloseHandle(h)';
+				execFileSync("python", ["-c", pyCode], { stdio: "ignore", windowsHide: true });
+			} catch {
+				// Native helper and fallback not available
 			}
 		} catch {
 			// Native helper not available — Shift+Tab won't be distinguishable from Tab.
