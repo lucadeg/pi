@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { setKittyProtocolActive } from "./keys.ts";
@@ -381,7 +382,6 @@ export class ProcessTerminal implements Terminal {
 
 			// Fallback for Windows console: configure CONIN$ directly via kernel32 SetConsoleMode
 			try {
-				const { execFileSync } = cjsRequire("node:child_process") as typeof import("node:child_process");
 				const pyCode = 'import ctypes;k=ctypes.windll.kernel32;h=k.CreateFileW("CONIN$",0xC0000000,3,None,3,0,None);m=ctypes.c_uint32();k.GetConsoleMode(h,ctypes.byref(m));k.SetConsoleMode(h,(m.value&~0x40)|0x80|0x200);k.CloseHandle(h)';
 				execFileSync("python", ["-c", pyCode], { stdio: "ignore", windowsHide: true });
 			} catch {
