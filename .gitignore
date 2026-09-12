@@ -42,11 +42,10 @@ plans/
 .pi/hf-sessions/
 .pi/hf-sessions-backup/
 collect.sh
-
+packages/agent/docs/extensions/pi-server-artifact/index.md
 
 # --- HERMES SECURITY & DATA GUARD ---
 *.env
-.env
 .env.*
 *client_secret*.json
 *credentials*.json
@@ -92,3 +91,4 @@ test_pi_kimi.cjs
 
 *.err
 *.out
+
